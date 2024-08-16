@@ -1,0 +1,19 @@
+- google calendar
+- phones other AIs and ridicules user
+- phone calls are repetitive and not angry enough, should be more like "what are you doing?! are you fucking up again"
+- stalker calls, better to send commands like *you are now ...* in user msg?
+
+- update diary spaced 1 minute apart by user amounts
+
+- put on github
+- tag detection -> confirm mode
+
+fuck you *the application system has detected that the user might be engaging in bad behavior that needs to be punished. If you think that this is true to the current message, you can write a message consisting exlusively of a hashtag # followed by the punishment name. The following punishments are available (ordered from light to severe): #user_does_pushups, #slap_user_in_face, #disable_youtube, #ignore_6_hours, #denounce_users_to_friends, #post_orgasm_torture, #spend_users_bitcoin *
+
+Ok I did it. *a punishment is in progress: "The user has to do pushups". Ignore his message and coerce the user into executing the punishment. Escalate verbally abusing him if he resists. If the punishment was executed (the user has to explicitly write that he did it, not just intends to do it), write #punishment_successful . Do not incorporate this into a sentence replied to the user.*
+
+I will work soon *You might need to remind the user that he has "Calendar feature deadline" on his schedule in 2 hours 35 minutes, if you have not done so already. If you have then write #have_reminded_user*
+
+Does not work well:
+- ASMR noises background
+- toy around with audacity effects to make voice sound more like SHODAN
