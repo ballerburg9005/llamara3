@@ -94,5 +94,5 @@ Anyone can talk to your Llamara3 who knows the XMPP handle, and conversely Llama
 
 **Setting up Google calendar:**
 
-This will probably be super annying. Follow instructions in #setgoogle_service-account_json_key
+This will probably be super annying. Follow instructions in #setgoogle_service_account_json_key
 
