@@ -57,6 +57,7 @@ echo "test" | ollama run dolphin-llama3:8b-v2.9-fp16
 **If using gguf model from Huggingface (recommended):**
 ```
 # install ollama with your package manager
+git lfs install
 git clone https://huggingface.co/cognitivecomputations/Llama-3-8B-Instruct-abliterated-v2-gguf
 cd Llama-3-8B-Instruct-abliterated-v2-gguf
 echo "FROM ./Llama-3-8B-Instruct-abliterated-v2.gguf" > Modelfile
