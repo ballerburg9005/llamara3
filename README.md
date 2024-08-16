@@ -32,7 +32,7 @@ Some features in the diagram are still in the process of being implemented, but 
 Setup
 =====
 
-*Hint: You need to install a lot of unknown python packages first, please help by writing a requirements.txt.*
+*Hint: You need to install a lot of unknown python packages first as well as ffmpeg. Please help by writing a requirements.txt.*
 
 ```
 git clone https://github.com/ballerburg9005/llamara3
