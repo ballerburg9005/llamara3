@@ -1454,7 +1454,10 @@ if __name__ == '__main__':
     config = json.loads('{"model": "Llama-3-8B-Instruct-abliterated-v2:latest", "xmpp_user": "", "xmpp_password": ""}')
     with open("config.json", 'r') as file:
         config = json.load(file)
-    
+   
+    if not os.path.exists("temp_audios"):
+        os.mkdir("temp_audios")
+ 
     if not config or not "model" in config or len(config["model"]) < 3:
         print("Model name missing in config.json (e.g. Llama-3-8B-Instruct-abliterated-v2:latest)")
     elif "xmpp_user" in config and "xmpp_password" in config and len(config["xmpp_user"]) > 5 and len(config["xmpp_password"]) > 3:
