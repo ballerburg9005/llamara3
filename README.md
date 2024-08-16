@@ -1,7 +1,7 @@
 Summary
 =======
 
-Llamara3 is self-hosted female ollama powered AI with extensive feature augmentations, that communicates to people via voice messages in an XMPP messenger (alike Whatsapp).
+Llamara3 is self-hosted female ollama powered personal assistant character AI with extensive feature augmentations, that communicates to people via voice messages in an XMPP messenger (alike Whatsapp).
 
 https://github.com/user-attachments/assets/906b3fa3-b787-47c1-af01-c4252b3fc116
 
