@@ -101,3 +101,6 @@ Llamara3 will work out of the box with example data (excl. Google calendar). Lla
 *Hint: RESET! only resets the current model dialogue buffer for the character and the behavior enforcer. It does not affect long-term memory and other systems.*
 
 Anyone can talk to your Llamara3 who knows the XMPP handle, and conversely Llamara3 can also message other people. The latter is currently not used. At the moment, anyone who talks to Llamara3 is just assumed to be a new user, and there is no exchange of information between them.
+
+
+![216_2023_4740_Figa_HTML](https://github.com/user-attachments/assets/a2f59542-17cd-468d-9717-5789db134485)
