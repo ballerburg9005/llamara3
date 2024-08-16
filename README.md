@@ -50,7 +50,7 @@ cp llamara3/assets/voice_sample.wav voices/llamara.wav
 git clone https://github.com/matatonic/openedai-speech
 cp llamara3/assets/voice_sample.wav openedai-speech/voices/
 cd openedai-speech
-sed "s#voices/shimmer.wav#voices/shimmer.wav\n  llamara:\n    model: xtts\n    speaker: voices/llamara.wav#g" voice_to_speaker.default.yaml
+sed -i "s#voices/shimmer.wav#voices/shimmer.wav\n  llamara:\n    model: xtts\n    speaker: voices/llamara.wav#g" voice_to_speaker.default.yaml
 pip install -U -r requirements.txt
 python add_voice.py
 bash startup.sh
