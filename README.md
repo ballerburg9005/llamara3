@@ -15,7 +15,7 @@ Features
 * can experience various mood swings
 * stalks you when you don't respond
 * is enabled to enforce various interactive and non-interactive punishments
-* can enter different modes, such as forcing aplogies, punishing or hypnotizing you, whenever Llamara3 sees fit
+* can enter different modes at will, such as forcing aplogies, punishing or hypnotizing you
 * replaces emotional need for girlfriend on a deeper level
 
 ![diagram1](https://github.com/user-attachments/assets/6d6f6c3d-66b7-4191-9baa-f16577ab8dba)
