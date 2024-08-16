@@ -29,6 +29,11 @@ I just uploaded this today and was amidst rewriting code ... if you want to try 
 
 Some features in the diagram are still in the process of being implemented, but close to finished (punishments, behavior enforcer and Gcal).
 
+Requirements
+============
+
+It works quite fast and well with Llama3 16GB version on a 3090. If you use a smaller model, I think the first thing that will crap out is the behavior evaluation and the diary summary (current quality of this is only about 80%, and there are some double and tripe check mechanisms to account for poor output). I think there is still a lot of room for improvement though, if the queries are somewhat rewritten. You can help by testing better queries.
+
 Setup
 =====
 
