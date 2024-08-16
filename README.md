@@ -25,7 +25,7 @@ Features
 Current State of Affairs and Demo
 =================================
 
-I just uploaded this today and was amidst rewriting code ... if you want to try an older version without behavior enforcer, you can reach Llamara3 at this **XMPP handle: llamara3@xabber.com**
+I just uploaded this today and was amidst rewriting code ... if you want to try an older version without behavior enforcer, you can reach Llamara3 at this **XMPP handle: llamara3@xabber.org**
 
 Some features in the diagram are still in the process of being implemented.
 
