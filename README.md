@@ -1,11 +1,13 @@
 Summary
 =======
+
 Llamara3 is self-hosted female ollama powered personal assistant character AI with extensive feature augmentations, that communicates to people via voice messages in an XMPP messenger (alike Whatsapp).
 
 https://github.com/user-attachments/assets/906b3fa3-b787-47c1-af01-c4252b3fc116
 
 Features
 ========
+
 * keeps track of your schedule (breakfast, work, lunch, sleep, etc)
 * incorporates Google calendar tasks
 * helps you to fulfill everyday tasks, such as eating, sleeping or working
@@ -22,7 +24,8 @@ Features
 
 Current State of Affairs and Demo
 =================================
-I just uploaded this today and was amidst rewriting code ... if you want to try an older version without behavior enforcer, you can reach Llamara3 at this **XMPP handle: llamara3@xabber.org** (please message me if it stopped working).
+
+I just uploaded this today and was amidst rewriting code ... if you want to try an older version without behavior enforcer and Calendar, you can reach Llamara3 at this **XMPP handle: llamara3@xabber.org** (please message me if it stopped working).
 
 Some features in the diagram are still in the process of being implemented, but close to finished (punishments, behavior enforcer and Gcal).
 
@@ -65,6 +68,7 @@ ollama create Llama-3-8B-Instruct-abliterated-v2 -f Modelfile
 ```
 
 **Register XMPP account:** https://providers.xmpp.net/
+
 Beware that some providers impose data limits, offer only 30 days trials with full features and such things. I can personally only attest very well to Disroot, but registrations are closed as of this writing.
 
 **Set up model, XMPP login & run:**
@@ -75,13 +79,20 @@ python bot.py
 ```
 
 **Using XMPP:**
+
 XMPP works just like Whatsapp, if you use a good client like [Conversations](https://f-droid.org/packages/eu.siacs.conversations/) for mobile or Gajim (Linux) or AstraChat (Windows). Conversations is only free if you get it from the free software F-Droid store.
 
 https://xmpp.org/software/
 
 **Talking to the model:**
+
 Llamara3 will work out of the box with example data (excl. Google calendar). Llamara3 will send you an intro message and give you instructions (type # for commands and help).
 
 *Hint: RESET! only resets the current model dialogue buffer for the character and the behavior enforcer. It does not affect long-term memory and other systems.*
 
 Anyone can talk to your Llamara3 who knows the XMPP handle, and conversely Llamara3 can also message other people. The latter is currently not used. Anyone who talks to Llamara3 is just assumed to be a new user, and there is no exchange of information between them.
+
+**Setting up Google calendar:**
+
+This will probably be super annying. Follow instructions in #setgoogle_service-account_json_key
+
