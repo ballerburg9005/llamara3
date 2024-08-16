@@ -80,7 +80,7 @@ Beware that some providers impose data limits, offer only 30 days trials with fu
 ```
 cp config.json_example config.json
 # edit config.json by hand
-python bot.py
+python run.py
 ```
 
 **Using XMPP:**
