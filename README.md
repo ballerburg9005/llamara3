@@ -102,7 +102,7 @@ Llamara3 will work out of the box with example data (excl. Google calendar). Lla
 
 Anyone can talk to your Llamara3 who knows the XMPP handle, and conversely Llamara3 can also message other people. The latter is currently not used. At the moment, anyone who talks to Llamara3 is just assumed to be a new user, and there is no exchange of information between them.
 
-![216_2023_4740_Figa_HTML](https://github.com/user-attachments/assets/591ac0ff-57f0-487c-b877-90c62736e321)
+![216_2023_4740_Figa_HTML](https://github.com/user-attachments/assets/f5d894bf-8bc9-4ee3-9a45-38daf5ac8d5d)
 
 License
 =======
