@@ -1,13 +1,11 @@
 Summary
 =======
-
 Llamara3 is self-hosted female ollama powered personal assistant character AI with extensive feature augmentations, that communicates to people via voice messages in an XMPP messenger (alike Whatsapp).
 
 https://github.com/user-attachments/assets/906b3fa3-b787-47c1-af01-c4252b3fc116
 
 Features
 ========
-
 * keeps track of your schedule (breakfast, work, lunch, sleep, etc)
 * incorporates Google calendar tasks
 * helps you to fulfill everyday tasks, such as eating, sleeping or working
@@ -24,13 +22,15 @@ Features
 
 Current State of Affairs and Demo
 =================================
-
 I just uploaded this today and was amidst rewriting code ... if you want to try an older version without behavior enforcer, you can reach Llamara3 at this **XMPP handle: llamara3@xabber.org**
 
-Some features in the diagram are still in the process of being implemented.
+Some features in the diagram are still in the process of being implemented, but close to finished (punishments, behavior enforcer and Gcal).
 
 Setup
 =====
+
+*Hint: You need to install a lot of unknown python packages first, please help by writing a requirements.txt.*
+
 ```
 git clone https://github.com/ballerburg9005/llamara3
 ```
@@ -64,10 +64,9 @@ ollama create Llama-3-8B-Instruct-abliterated-v2 -f Modelfile
 ```
 
 **Register XMPP account:** https://providers.xmpp.net/
-
 Beware that some providers impose data limits, offer only 30 days trials with full features and such things. I can personally only attest very well to Disroot, but registrations are closed as of this writing.
 
-**Set up model:**
+**Set up model, XMPP login & run:**
 ```
 cp config.json_example config.json
 # edit config.json by hand
@@ -78,8 +77,6 @@ python bot.py
 XMPP works just like Whatsapp, if you use a good client like [Conversations](https://f-droid.org/packages/eu.siacs.conversations/) for mobile or Gajim (Linux) or AstraChat (Windows). Conversations is only free if you get it from the free software F-Droid store.
 
 https://xmpp.org/software/
-
-**
 
 **Talking to the model:**
 Llamara3 will work out of the box with example data (excl. Google calendar). Llamara3 will send you an intro message and give you instructions (type # for commands and help).
