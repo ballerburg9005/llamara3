@@ -1108,7 +1108,7 @@ I have self-worth issues and avoid people.
         """Generate TTS audio and save it to a file."""
         payload = {
             "input": text,
-            "voice": "daphne_long",
+            "voice": "llamara",
             "model": "tts-1-hd"
         }
         print("Model output: "+text+"\n")
