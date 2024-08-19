@@ -46,9 +46,8 @@ git clone https://github.com/ballerburg9005/llamara3
 **Openedai-speech:**
 ```
 conda activate conda3.11
-cp llamara3/assets/voice_sample.wav voices/llamara.wav
 git clone https://github.com/matatonic/openedai-speech
-cp llamara3/assets/voice_sample.wav openedai-speech/voices/
+cp llamara3/assets/voice_sample.wav openedai-speech/voices/llamara.wav
 cd openedai-speech
 sed -i "s#voices/shimmer.wav#voices/shimmer.wav\n  llamara:\n    model: xtts\n    speaker: voices/llamara.wav#g" voice_to_speaker.default.yaml
 pip install -U -r requirements.txt
