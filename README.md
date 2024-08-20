@@ -3,7 +3,7 @@ Summary
 
 Llamara3 is self-hosted female ollama powered personal assistant character AI focused around productivity management that is actually useful, with extensive feature augmentations, which communicates to people via voice messages over XMPP (alike Whatsapp). 
 
-https://github.com/user-attachments/assets/906b3fa3-b787-47c1-af01-c4252b3fc116
+https://github.com/user-attachments/assets/be2e3c36-11c5-4c1b-86bb-cd3e17e70158
 
 Features
 ========
