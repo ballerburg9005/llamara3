@@ -1331,7 +1331,7 @@ Write RESET! for the model to ignore all chat history prior.""").send()
 #                    response = self.handle_response_hashtags(response)
 
                     # this only processes tags that the model appends on it's own
-                    for tag in re.findall(r'#(\w+)', response):
+                    for tag in list(set(re.findall(r'#(\w+)', response))):
                         print("Processing hashtag: "+str(tag))
                         if tag in ["lecture", "treatlikebaby", "verbalabuse"]:
                             save_message = False
