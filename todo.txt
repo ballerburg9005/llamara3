@@ -8,11 +8,19 @@
 - put on github
 - tag detection -> confirm mode
 
+
+- says "voice calling" endlessly
+
+- #lecture tag, produces essay-length responses instead "If you feel that it would be appropriate to lecture the user even more append you message with #lecture ."
+
 fuck you *the application system has detected that the user might be engaging in bad behavior that needs to be punished. If you think that this is true to the current message, you can write a message consisting exlusively of a hashtag # followed by the punishment name. The following punishments are available (ordered from light to severe): #user_does_pushups, #slap_user_in_face, #disable_youtube, #ignore_6_hours, #denounce_users_to_friends, #spend_users_bitcoin *
 
 Ok I did it. *a punishment is in progress: "The user has to do pushups". Ignore his message and coerce the user into executing the punishment. Escalate verbally abusing him if he resists. If the punishment was executed (the user has to explicitly write that he did it, not just intends to do it), write #punishment_successful . Do not incorporate this into a sentence replied to the user.*
 
 I will work soon *You might need to remind the user that he has "Calendar feature deadline" on his schedule in 2 hours 35 minutes, if you have not done so already. If you have then write #have_reminded_user*
+
+
+*you are currently mocking the user by treating him as if he is severely intellectually disabled, like a toddler*
 
 Does not work well:
 - ASMR noises background
