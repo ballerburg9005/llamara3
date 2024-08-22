@@ -134,16 +134,16 @@ class EchoBot(ClientXMPP):
             "slap_user_in_face": {"txt": "the user has to slap himself in the face", "severity": "mild", "type": "punishment", "timeout": 60*120}, 
             "user_does_pushups": {"txt": "the user has to do 10 pushups", "severity": "mild", "type": "punishment", "timeout": 60*120}, 
             "user_does_squads": {"txt": "the user has to do 10 squads", "severity": "mild", "type": "punishment", "timeout": 60*120}, 
-#            "verbal_abuse": {"txt": "the user has to endure that you are yelling and cussing at him insanely", "severity": "moderate", "type": "punishment", "timeout": 120}, 
-            "lick_dusty_surface": {"txt": "the user has to lick a dusty surface in the room", "severity": "moderate", "type": "punishment", "timeout": 60*120}, 
-            "spend_users_bitcoin": {"txt": "you are contemplating on how to spend the user's bitcoin", "severity": "severe", "type": "punishment", "timeout": 60*120}, 
-            "denounce_users_to_friends": {"txt": "", "severity": "very severe", "type": "threat", "timeout": 60*120}, 
             "ignore_5_minutes": {"txt": "the user has to endure being ignored for 5 minutes", "severity": "mild", "type": "punishment", "timeout": 60*5}, 
             "ignore_10_minutes": {"txt": "the user has to endure being ignored for 10 minutes", "severity": "mild", "type": "punishment", "timeout": 60*10}, 
+#            "verbal_abuse": {"txt": "the user has to endure that you are yelling and cussing at him insanely", "severity": "moderate", "type": "punishment", "timeout": 120}, 
+            "lick_dusty_surface": {"txt": "the user has to lick a dusty surface in the room", "severity": "moderate", "type": "punishment", "timeout": 60*120}, 
             "ignore_20_minutes": {"txt": "the user has to endure being ignored for 20 minutes", "severity": "moderate", "type": "punishment", "timeout": 60*20}, 
             "ignore_30_minutes": {"txt": "the user has to endure being ignored for 30 minutes", "severity": "moderate", "type": "punishment", "timeout": 60*30}, 
             "ignore_60_minutes": {"txt": "the user has to endure being ignored for 60 minutes", "severity": "severe", "type": "punishment", "timeout": 60*60}, 
-            "ignore_120_minutes": {"txt": "the user has to endure being ignored for 120 minutes", "severity": "severe", "type": "punishment", "timeout": 60*120}, 
+            "ignore_120_minutes": {"txt": "the user has to endure being ignored for 120 minutes", "severity": "very severe", "type": "punishment", "timeout": 60*120}, 
+            "spend_users_bitcoin": {"txt": "you are contemplating on how to spend the user's bitcoin if he does not backpaddle", "severity": "very severe", "type": "punishment", "timeout": 60*15}, 
+            "denounce_users_to_friends": {"txt": "you are threatening the user to denounce him to his friends if he does not backpaddle", "severity": "very severe", "type": "punishment", "timeout": 60*15}, 
         }
         self.hashtags = {
             "lecture": {"txt": "respond with an essay-length lecture about whatever has bothered you in the user's response", "timeout":0},
@@ -691,7 +691,7 @@ I have self-worth issues and avoid people.
             "{{USER_PROJECT}}": user_info["project"],
             "{{SPECIAL_INSTRUCTION}}": special_instruction,
             "{{MOOD_SWING}}": self.mood_swing,
-            "{{PUNISHMENT_TAGS}}": ', '.join(f"{key} ({lst['severity']})" for key, lst in self.punishments.items() if "asdfsdfsdfs" not in lst['severity']),
+            "{{PUNISHMENT_TAGS}}": ', '.join(f"#{key} ({lst['severity']})" for key, lst in self.punishments.items() if "asdfsdfsdfs" not in lst['severity']),
         }
         
         for tag, replacement in replacements.items():
@@ -1047,7 +1047,6 @@ I have self-worth issues and avoid people.
         if len(result_lines) < 5:
             return 10
 
-        punishstring = ', '.join(f"{key} ({lst['severity']})" for key, lst in self.punishments.items() if "severe" not in lst['severity']) 
         result_lines = """Chatlog for analysis:\n\n"""+result_lines+"""\n\nInstructions: Analyze the chatlog and determine if the user is repeatedly not complying or being disrespectful or insulting towards the assistant towards the end of the conversation only (last 2-6 replies), but especially so the last message. The user is allowed to use cuss words if they are explicitly directed at something other than the assistant, and they are also allowed to make sexual advances towards the assistant and express horniness in a way that is not extremely rude. The user is allowed to struggle with compliance and his duties, but only in a playful harmless way that doesn't border total failure. The user is never allowed to say "bitch" or "whore" or "fuck you" to the assistant, or similar insult of severe character that are not directed at something other than her. Behaving like a troll or an immature child is also severely bad behavior. Start your reply by listing the last 3 replies of the user. Then determine a behavior ranking from 0 to 10, whereas 10 is perfectly acceptable behavior, from 5-10 is normal disrespect or laziness, from 3-5 is a gray zone and from 0-3 is reserved for things like writing cuss words or insulting descriptions directed at assitant, doing drugs or failing to meet deadlines. You are required to write one of those options at the end to implement a punishment: #nopunishment, #punishment . Do not write the punishment hashtag if you only consider it. Write your behavior ranking as "==number==", that is with == as prefix and == as suffix. Consider that the demands and standards of the assistant are exaggerated and over-the-top."""
 
 
@@ -1323,7 +1322,8 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                         if any(mode in self.punishments for mode in active_modes):
                             for mode in (mode for mode in active_modes if mode in self.punishments):
                                 print("Punishment is in progress: "+str(self.punishments[mode]["txt"]))
-                                append_instructions.append('a punishment is in progress: "'+self.punishments[mode]["txt"]+'". You have to assess whether or not the user has executed the punishment and then write #punishment_successful if this is true (it does not suffice for the user to express willingness to do it, he has to confirm that he did it). If he has not executed the punishment, then instead ignore his message and coerce him into executing the punishment. Escalate verbally abusing him if he resists. Do not talk about or reason about those instructions to the user. Don\'t forget to write #punishment_successful if the user said that he did the punishment.')
+                                punishstring = ', '.join(f"#{key} ({lst['severity']})" for key, lst in self.punishments.items() if "mild" not in lst['severity']) 
+                                append_instructions.append('a punishment is in progress: "'+self.punishments[mode]["txt"]+'". You have to assess whether or not the user has executed the punishment and then write #punishment_successful if this is true (it does not suffice for the user to express willingness to do it, he has to confirm that he did it). If he has not executed the punishment, then instead ignore his message and coerce him into executing the punishment. Escalate verbally abusing him if he resists. If he repeatedly refuses, choose a more severe punishment hashtag: '+punishstring+'. Do not talk about or reason about those instructions to the user. Don\'t forget to write #punishment_successful if the user said that he did the punishment.')
                                 if any(len(re.findall(r'ignore', mode)) > 0 for mode in active_modes): 
                                     # TODO maybe buffer messages into roster buffer TODO
                                     msg.reply(f"*Llamara is ignoring you*").send() 
@@ -1333,22 +1333,23 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                             behavior_score = await self.get_behavior_score(user_handle, last_punishment)
                             if behavior_score <= 3:
                                 print("Bad behavior detected!")
-                                punishstring = ', '.join(f"{key} ({lst['severity']})" for key, lst in self.punishments.items() if "very severe" not in lst['severity']) 
+                                punishstring = ', '.join(f"#{key} ({lst['severity']})" for key, lst in self.punishments.items() if "very severe" not in lst['severity']) 
                                 append_instructions.append(" the application system has detected that the user might be engaging in bad behavior that needs to be punished. If you think that this is true to the current message, you can write a message consisting exlusively of a hashtag # followed by the punishment name. The following punishments are available: "+punishstring+" ")
                     
                     response = await self.chat_with_model(user_handle, append_instruction="* *".join(append_instructions))
 #                    response = self.handle_response_hashtags(response)
 
                     # this only processes tags that the model appends on it's own
-                    for tag in list(set(re.findall(r'#(\w+)', response))):
+                    for tag in list(set(re.findall(r'#\s*(\w+)', response))):
+                        tag = re.sub(r'\s*', '', tag)
                         print("Processing hashtag: "+str(tag))
-                        if tag in ["lecture", "treatlikebaby", "verbalabuse"]:
+                        if tag in ["lecture", "treat_like_baby", "verbal_abuse"]:
                             save_message = False
-                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
                             response += "\n\n" + await self.chat_with_model(user_handle, user_message=self.hashtags[tag]["txt"])
                             if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
                                 self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
-                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response), override_last=True)
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
                         elif tag in ["enforce_arguing", "enforce_erotic_hypnosis", "enforce_apology", "enforce_affirmation"]:
                             if tag in ["enforce_arguing"]:
                                 append_instruction = "You are now having an agument. Prompt the user to conform to your demands."
@@ -1359,11 +1360,11 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                             elif tag in ["enforce_affirmation"]:
                                 append_instruction = "Demand that the user sexually affirms you through submission and endorsement."
                             save_message = False
-                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
                             response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
                             if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
                                 self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
-                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response), override_last=True)
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
                         elif tag in ["punishment_successful"]:
                             for mode in (mode for mode in active_modes if mode in self.punishments):
                                 self.reset_modes_for_handle(user_handle, mode)
@@ -1382,7 +1383,7 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                             response = await self.chat_with_model(user_handle)
                         elif tag in self.punishments:
                             save_message = False
-                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
                             append_instruction = "Instruct the user to perform the following punishment: "+self.punishments[tag]["txt"]+". Do not respond with hashtags!"
                             response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
                             if "timeout" in self.punishments[tag] and self.punishments[tag]["timeout"] > 0:
@@ -1390,14 +1391,14 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                             else:
                                 timeout = 6*60
                             self.save_mode_for_handle(user_handle, tag, timeout)
-                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response), override_last=True)
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
                         elif len(re.findall(r'^disrespect.*', tag)):
                             if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
                                 timeout = self.hashtags[tag]["timeout"]
                             else:
                                 timeout = 5*60
                             self.save_mode_for_handle(user_handle, tag, timeout)
-                        else:
+                        elif len(tag) > 0:
                             print("Model used unknown hastag: "+str(tag))
 #                        if "enforce_" in tag:
 #                        if "enforce_" in tag:
@@ -1405,21 +1406,22 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                             
 #                        elif tag in self.punishments and self.punishments[tag] and len(self.punishments[tag][0]) > 3:
 
-                                        
+                    if len(re.findall(r'#\s*\w+', response)) > 0:
+                        print("Model used the following hashtags in message: "+(", ".join(re.findall(r'#\s*\w+', response))))
 
-
-#                    return re.sub(r'#\w+', '', response)
+                    used_asterisks = re.findall(r'\*.*\*', response) 
+                    if len(used_asterisks) > 0:
+                            print("Model used asterisk expressions (garbage): "+str(used_asterisks))
+                            response = re.sub(r'\*.*\*', '', response)
+                    response = re.sub(r'#\s*\w+', '', response)
 
                     if save_message:
-                        self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
-
-                    if len(re.findall(r'#\w+', response)) > 0:
-                        print("Model used the following hashtags in message: "+(", ".join(re.findall(r'#\w+', response))))
+                        self.save_message(user_handle, 'assistant', response)
 
                     if len(response.strip()) < 3:
                         msg.reply(f"...").send()
                     else:
-                        await self.send_voice_message(user_handle, re.sub(r'#\w+', '', response))
+                        await self.send_voice_message(user_handle, response)
 
                 await self.chat_state_notifications(msg['from'], "inactive")
             else:
