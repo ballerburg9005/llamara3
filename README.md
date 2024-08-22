@@ -31,6 +31,7 @@ Some features in the diagram are still in the process of being implemented, but 
 
 1. Punishments and behavior enforcer are working, but slightly bugged and not fine-tuned
 2. Gcal fetching is done, but the tasks are not processed by additional logic
+3. Twitter, Bitcoin and denouncer punisher unimplemented
 
 Requirements
 ============
