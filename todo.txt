@@ -8,10 +8,16 @@
 - put on github
 - tag detection -> confirm mode
 
+- sometimes writes # slap_user_in_face
+- always picks #slap_user_in_face not other punishments
 
-- says "voice calling" endlessly
+- output sometimes concatenates if two voice generations are running at once
 
-- #lecture tag, produces essay-length responses instead "If you feel that it would be appropriate to lecture the user even more append you message with #lecture ."
+- hashtags don't work in phone calls
+
+? says "voice calling" endlessly
+
+? #lecture tag, produces essay-length responses instead "If you feel that it would be appropriate to lecture the user even more append you message with #lecture ."
 
 fuck you *the application system has detected that the user might be engaging in bad behavior that needs to be punished. If you think that this is true to the current message, you can write a message consisting exlusively of a hashtag # followed by the punishment name. The following punishments are available (ordered from light to severe): #user_does_pushups, #slap_user_in_face, #disable_youtube, #ignore_6_hours, #denounce_users_to_friends, #spend_users_bitcoin *
 

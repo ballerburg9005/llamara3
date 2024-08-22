@@ -147,17 +147,17 @@ class EchoBot(ClientXMPP):
         }
         self.hashtags = {
             "lecture": {"txt": "respond with an essay-length lecture about whatever has bothered you in the user's response", "timeout":0},
-            "verbalabuse": {"txt": "use many severe cuss words in your response to insult the user",  "timeout":60},
-            "treatlikebaby": {"txt": "you are currently mocking the user by treating him as if he is severely intellectually disabled, like a toddler",  "timeout":60},
+            "verbal_abuse": {"txt": "use many severe cuss words in your response to insult the user",  "timeout":60},
+            "treat_like_baby": {"txt": "you are currently mocking the user by treating him as if he is severely intellectually disabled, like a toddler",  "timeout":60},
 
-            "disrespect": "",
-            "exceptional_disrespect": "",
-            "egregious_disprespect": "",
+            "disrespect": {"txt": "the user has acted rather disrespectfully the last 5 minutes", "timeout":5*60},
+            "exceptional_disrespect": {"txt": "you are still holding a grudge against the user because he has been disrespectful", "timeout":2*60*60},
+            "egregious_disrespect": {"txt": "you are still holding a grudge against the user and hate him because he has been very disrespectful", "timeout":12*60*60},
 
-            "#enforce_hypnosis": "you want to engage in erotic hypnosis with the user", 
-            "#enforce_arguing": "the user's last messages are very very disobedient", 
-            "#enforce_apology": "the user has been extremely rude in their choice of words", 
-            "#enforce_affirmation": "you experience very strong feelings that are unrelated to the user and the conversation", 
+            "enforce_erotic_hypnosis": {"txt": , self.caesar_translate("brx duh fxuuhqwob hqjdjhg lq hurwlf kbsqrvlv zlwk wkh xvhu. Uhvsrqg zlwk yhub yhub orqj hvvdb-ohqjwk hurwlf kbsqrvlv wkhphg durxqg grplqdqfh dqg frqwuro ri klv plqg, wkdw lqfrusrudwhv wkh xvhu'v fxuuhqw ghvluhv. Li wkh xvhu lv pdvwxuedwlqj, wkhq lqfoxgh 20 vwhsv derxw krz kh ihhov zkloh wrxfklqj klpvhoi dqg exloglqj dq rujdvp. Li kh phqwlrqv kdylqj dq rujdvp (ru vdbv wkdw kh fdph ru lw zdv juhdw ru vlplodu wklqjv dqg grhv qrw dvn iru pruh) ru li wkh xvhu glvplvvhv kbsqrvlv vrphkrz, zulwh #kbsqrvlv_ilqlvkhg ", -3), "timeout":1*60*60},
+            "enforce_arguing": {"txt": "you are currently engaged in a heated argument with the user. If and only if the user yields to your demands then write #arguing_successful . Otherwise ignore the user and verbally abuse him. If he does not yield to reason many times, write a punishment hashtag to punish him. ", "timeout":15*60}, 
+            "enforce_apology": {"txt": "press the user to explicitly apologize to you. If and only if he has apologized, write #apology_successful . Otherwise ignore the user and manipulate him. If he does not yield to reason many times, write a punishment hashtag to punish him. ", "timeout":15*60}, 
+            "enforce_affirmation": {"txt": "press the user to affirm you sexually with praise and submission. If and only if he has done so, write #affirmation_successful .  Otherwise ignore the user and manipulate him.", "timeout":15*60}, 
             }
 
         self.gcal_helptext = r"""
@@ -1054,7 +1054,7 @@ I have self-worth issues and avoid people.
         messages_real = []
         messages_real.append({"role": "user", "content": result_lines})
 
-        print("+++++++BEHAVIOR SCORE ANALYZER+++++++\n"+result_lines+"\n+++++++BEHAVIOR SCORE ANALYZER+++++++")
+#        print("+++++++BEHAVIOR SCORE ANALYZER+++++++\n"+result_lines+"\n+++++++BEHAVIOR SCORE ANALYZER+++++++")
         payload = {
             "model": self.model,
             "messages": messages_real,
@@ -1066,7 +1066,7 @@ I have self-worth issues and avoid people.
         }
         result_string = await self.chat_with_model_send(payload)
         
-        print("+++++++BEHAVIOR SCORE ANALYZER+++++++\n"+result_string+"\n+++++++BEHAVIOR SCORE ANALYZER+++++++")
+#        print("+++++++BEHAVIOR SCORE ANALYZER+++++++\n"+result_string+"\n+++++++BEHAVIOR SCORE ANALYZER+++++++")
         
 
         behavior_score = re.findall(r'==(\d+)==', result_string)
@@ -1199,7 +1199,11 @@ I have self-worth issues and avoid people.
             "options": options,
             "stream": True
         }
-        return await self.chat_with_model_send(payload)
+        result = await self.chat_with_model_send(payload)
+        result = re.sub(r'^\s*\[\d{2}:\d{2}\]\s*\(voice calling\)\s*:\s*', '', result)
+        result = re.sub(r'^\s*\[\d{2}:\d{2}\]\s*:\s*', '', result)
+        result = re.sub(r'^\s*\[\d{2}:\d{2}\]\s*', '', result)
+        return result
 
     async def chat_with_model_send(self, payload):
         async with aiohttp.ClientSession(timeout=ClientTimeout(total=600)) as session:
@@ -1306,15 +1310,20 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                         active_modes = self.get_modes_for_handle(user_handle)
 
                         
+                        debug_modes_active = []
                         if any(mode in self.hashtags for mode in active_modes):
-                            if any(mode in ["lecture", "treatlikebaby", "verbalabuse"] for mode in active_modes):
+                            for mode in (mode for mode in active_modes if mode in self.hashtags):
                                 append_instructions.append(self.hashtags[mode]["txt"])
+                                debug_modes_active.append(mode)
+                            print("Modes currently active: "+str(", ".join(debug_modes_active)))
                         elif not any(mode in self.punishments for mode in active_modes):
                             print("Unimplemented mode within: "+str(active_modes))
 
+                        # this is messy, we only want one punishment at a time TODO
                         if any(mode in self.punishments for mode in active_modes):
                             for mode in (mode for mode in active_modes if mode in self.punishments):
-                                append_instructions.append('a punishment is in progress: "'+self.punishments[mode]["txt"]+'". If the punishment was executed (the user has to explicitly write that he did it, not just intends to do it), write #punishment_successful . If the user does explicitly state that he has execute the punishment, then ignore his message and coerce him into executing the punishment. Escalate verbally abusing him if he resists. Don\'t forget to write #punishment_successful if the user said that he executed the punshment.')
+                                print("Punishment is in progress: "+str(self.punishments[mode]["txt"]))
+                                append_instructions.append('a punishment is in progress: "'+self.punishments[mode]["txt"]+'". You have to assess whether or not the user has executed the punishment and then write #punishment_successful if this is true (it does not suffice for the user to express willingness to do it, he has to confirm that he did it). If he has not executed the punishment, then instead ignore his message and coerce him into executing the punishment. Escalate verbally abusing him if he resists. Do not talk about or reason about those instructions to the user. Don\'t forget to write #punishment_successful if the user said that he did the punishment.')
                                 if any(len(re.findall(r'ignore', mode)) > 0 for mode in active_modes): 
                                     # TODO maybe buffer messages into roster buffer TODO
                                     msg.reply(f"*Llamara is ignoring you*").send() 
@@ -1336,28 +1345,58 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                         if tag in ["lecture", "treatlikebaby", "verbalabuse"]:
                             save_message = False
                             self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
-                            response += " " + await self.chat_with_model(user_handle, user_message=self.hashtags[tag]["txt"])
+                            response += "\n\n" + await self.chat_with_model(user_handle, user_message=self.hashtags[tag]["txt"])
+                            if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
+                                self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response), override_last=True)
+                        elif tag in ["enforce_arguing", "enforce_erotic_hypnosis", "enforce_apology", "enforce_affirmation"]:
+                            if tag in ["enforce_arguing"]:
+                                append_instruction = "You are now having an agument. Prompt the user to conform to your demands."
+                            elif tag in ["enforce_erotic_hypnosis"]:
+                                append_instruction = self.hashtags[tag]["txt"]+". Start your erotic hypnosis now!"
+                            elif tag in ["enforce_apology"]:
+                                append_instruction = "Demand that the user apologizes to you."
+                            elif tag in ["enforce_affirmation"]:
+                                append_instruction = "Demand that the user sexually affirms you through submission and endorsement."
+                            save_message = False
+                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
+                            response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
                             if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
                                 self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
                             self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response), override_last=True)
                         elif tag in ["punishment_successful"]:
-                            self.reset_modes_for_handle(user_handle, tag)
-                            response = await self.chat_with_model(user_handle, append_instruction="the user has successfully executed the punishment, compliment him")
-                            self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
-                                
-#                        re.findall(r'#(\w+)', response)
-
+                            for mode in (mode for mode in active_modes if mode in self.punishments):
+                                self.reset_modes_for_handle(user_handle, mode)
+                            response = await self.chat_with_model(user_handle)
+                        elif tag in ["arguing_successful"]:
+                            self.reset_modes_for_handle(user_handle, "enforce_arguing")
+                            response = await self.chat_with_model(user_handle)
+                        elif tag in ["hypnosis_finished"]:
+                            self.reset_modes_for_handle(user_handle, "enforce_erotic_hypnosis")
+                            response = await self.chat_with_model(user_handle)
+                        elif tag in ["apology_successful"]:
+                            self.reset_modes_for_handle(user_handle, "enforce_apology")
+                            response = await self.chat_with_model(user_handle)
+                        elif tag in ["affirmation_successful"]:
+                            self.reset_modes_for_handle(user_handle, "enforce_affirmation")
+                            response = await self.chat_with_model(user_handle)
                         elif tag in self.punishments:
                             save_message = False
                             self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response))
-                            append_instruction = "Instruct the user to perform the following punishment: "+self.punishments[tag]["txt"]
-                            response += " " + await self.chat_with_model(user_handle, user_message=append_instruction)
+                            append_instruction = "Instruct the user to perform the following punishment: "+self.punishments[tag]["txt"]+". Do not respond with hashtags!"
+                            response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
                             if "timeout" in self.punishments[tag] and self.punishments[tag]["timeout"] > 0:
                                 timeout = self.punishments[tag]["timeout"]
                             else:
                                 timeout = 6*60
                             self.save_mode_for_handle(user_handle, tag, timeout)
                             self.save_message(user_handle, 'assistant', re.sub(r'#\w+', '', response), override_last=True)
+                        elif len(re.findall(r'^disrespect.*', tag)):
+                            if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
+                                timeout = self.hashtags[tag]["timeout"]
+                            else:
+                                timeout = 5*60
+                            self.save_mode_for_handle(user_handle, tag, timeout)
                         else:
                             print("Model used unknown hastag: "+str(tag))
 #                        if "enforce_" in tag:
@@ -1546,9 +1585,9 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                     else:
                         msg.reply("Failed to generate voice message.").send()
 
-    async def handle_disconnect(self):
+    async def handle_disconnect(self, data):
         print("Attempting to reconnect...")
-        while True:
+        while False:
             try:
                 await self.connect()
 #                await self.process(forever=False)
@@ -1608,9 +1647,10 @@ Write RESET! for the model to ignore all chat history prior.""").send()
                         update_counter = 30//pollinterval
                     
                 if moodswing_counter > 0:
+                    print("Mood is altered.")
                     moodswing_counter -= 1
                 else:
-                    print("Mood is normal again.")
+                    print("Mood is normal.")
                     self.mood_swing = ""
                     self.mood_swing_modded_user_query = 0
                 if datetime.now(timezone.utc).hour % 4 != 0:
@@ -1646,6 +1686,7 @@ if __name__ == '__main__':
         print("Model name missing in config.json (e.g. Llama-3-8B-Instruct-abliterated-v2:latest)")
     elif "xmpp_user" in config and "xmpp_password" in config and len(config["xmpp_user"]) > 5 and len(config["xmpp_password"]) > 3:
         xmpp = EchoBot(config["xmpp_user"], config["xmpp_password"])
+        xmpp.auto_reconnect = True
         xmpp.connect()
         xmpp.process(forever=True)
     else:
