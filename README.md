@@ -25,9 +25,12 @@ Features
 Current State of Affairs and Demo
 =================================
 
-I just uploaded this today and was amidst rewriting code (broken) ... if you want to try an older version without behavior enforcer and Calendar, you can reach Llamara3 at this **XMPP handle: llamara3@pwned.life** (please message me if it stopped working).
+You can reach Llamara3 at this **XMPP handle: llamara3@pwned.life** (please message me if it stopped working).
 
-Some features in the diagram are still in the process of being implemented, but close to finished (punishments, behavior enforcer and Gcal).
+Some features in the diagram are still in the process of being implemented, but close to finished:
+
+1. Punishments and behavior enforcer are working, but slightly bugged and not fine-tuned
+2. Gcal fetching is done, but the tasks are not processed by additional logic
 
 Requirements
 ============
