@@ -3,3 +3,4 @@ userinfo.txt
 temp_audios/*
 config.json
 promo*
+__pycache__
