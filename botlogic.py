@@ -1477,18 +1477,15 @@ Write RESET! for the model to ignore all chat history prior.""")
 
 
 
+    # those need to be defined by the particular implementation
     def is_connected(self) -> bool:
         return False    
-
     async def handle_disconnect(self, data=""):
         pass
-
     async def send_text_message(self, ctx, user_handle, text) -> bool:
         return False
-        
     async def send_voice_message(self, ctx, user_handle, text) -> bool:
         return False
-
     async def set_avatar(self, ctx) -> bool:
         return False
 

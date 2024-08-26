@@ -46,7 +46,7 @@ class EchoBot(commands.Cog, BotLogic):
 
             if default_channel:
                 self.ctx = default_channel
-        await self.bot.change_presence(activity=discord.Game(name='Available (Llamara3)'))
+        await self.bot.change_presence(activity=discord.Game(name='assistant'))
 
 
     @commands.Cog.listener()
@@ -58,9 +58,12 @@ class EchoBot(commands.Cog, BotLogic):
         user_message = self.sanitize_ascii_input(message.content.strip())
         user_handle = self.sanitize_ascii_input(message.author.name+"#"+str(message.author.id), True)
 
-        if message.content and not (message.content.startswith('https://') and 'upload' in message.content):
-            await self.bot.change_presence(activity=discord.Game(name='Available (Llamara3)'))
-            await self.process_message(user_handle, user_message)
+        user = await self.get_user_by_handle(user_handle)
+
+        async with user.typing():
+            if message.content and not (message.content.startswith('https://') and 'upload' in message.content):
+                await self.bot.change_presence(activity=discord.Game(name='assistant'))
+                await self.process_message(user_handle, user_message)
 
 
     @commands.command()
@@ -69,10 +72,10 @@ class EchoBot(commands.Cog, BotLogic):
 
         user = await self.get_user_by_handle(user_handle)
 
-
         try:
             if user:
-                await user.send(text)
+                async with user.typing():
+                    await user.send(text)
                 return True
             else:
                 await ctx.send(f'User {user_handle} not found.')
@@ -109,11 +112,12 @@ class EchoBot(commands.Cog, BotLogic):
 
         try:
             if user:
-                if await self.generate_tts_audio(text, user_handle):
-                    self.process_audio_files(user_handle)
-                    await user.send(file=discord.File("temp_audios/"+user_handle+".mp3"))
-                else:
-                    await ctx.send("Error generating audio file.")
+                async with user.typing():
+                    if await self.generate_tts_audio(text, user_handle):
+                        self.process_audio_files(user_handle)
+                        await user.send(file=discord.File("temp_audios/"+user_handle+".mp3"))
+                    else:
+                        await ctx.send("Error generating audio file.")
                 return True
             else:
                 await ctx.send(f'User {user_handle} not found.')
