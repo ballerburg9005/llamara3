@@ -25,7 +25,7 @@ Features
 Current State of Affairs and Demo
 =================================
 
-You can reach Llamara3 at this **XMPP handle: llamara3@pwned.life** (please message me if it stopped working).
+You can reach Llamara3 at this **XMPP handle: llamara3@pwned.life** (please message me if it stopped working) or if you send it a DM from Discord: https://discord.gg/GRs73WU7 .
 
 Some features in the diagram are still in the process of being implemented, but close to finished:
 
@@ -81,11 +81,14 @@ ollama create Llama-3-8B-Instruct-abliterated-v2 -f Modelfile
 
 Beware that some providers impose data limits, offer only 30 days trials with full features and such things. I can personally only attest very well to Disroot, but registrations are closed as of this writing.
 
+You can now also set up a Discord bot instead. Don't ask me how.
+
 **Set up model, XMPP login & run:**
 ```
 cp config.json_example config.json
-# edit config.json by hand
-python run.py
+# edit config.json by hand (user/password for XMPP, or just token for Discord bot)
+python run_xmpp.py
+#python run_discord.py
 ```
 
 **Using XMPP:**
