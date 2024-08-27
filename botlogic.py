@@ -46,6 +46,8 @@ class BotLogic():
             "Connection": "keep-alive"
         }
 
+        self.debug_toggler1 = 0
+
         self.randphone = random.randint(0, 30)
         self.mood_swing = ""
         self.mood_swing_since = 0
@@ -962,7 +964,7 @@ I have self-worth issues and avoid people.
                 "num_predict": 2048,
                 "temperature": 0.2,
             },
-            "stream": True
+            "stream": False
         }
         result_string = await self.chat_with_model_send(payload)
         
@@ -1041,7 +1043,7 @@ I have self-worth issues and avoid people.
                     "num_predict": 16000,
                     "temperature": 1,
                 },
-                "stream": True
+                "stream": False
             }
             result_string += key+":\n" + await self.chat_with_model_send(payload)
 
@@ -1078,7 +1080,7 @@ I have self-worth issues and avoid people.
                 "num_predict": 32000,
                 "num_ctx" : 16384,
             },
-            "stream": True
+            "stream": False
         }
         if len(self.mood_swing) > 3:
             options = {
@@ -1098,7 +1100,7 @@ I have self-worth issues and avoid people.
             "model": self.model,
             "messages": messages,
             "options": options,
-            "stream": True
+            "stream": False
         }
         result = await self.chat_with_model_send(payload)
         result = re.sub(r'^\s*\[\d{2}:\d{2}\]\s*\(voice calling\)\s*:\s*', '', result)
@@ -1107,7 +1109,28 @@ I have self-worth issues and avoid people.
         return result
 
 
+    def process_line(self, line, assistant_reply):
+        """Process a single line of JSON data and update assistant_reply."""
+        if line.strip():  
+            try:
+                data = json.loads(line)
+                message_content = data.get("message", {}).get("content", "")
+                if message_content:
+                    assistant_reply += message_content
+                if data.get("done", False): 
+                    return assistant_reply, True 
+            except json.JSONDecodeError as e:
+                print(f"Failed to decode JSON: {e}")
+                print(f"Line: {line}")
+        return assistant_reply, False
+
+
     async def chat_with_model_send(self, payload):
+
+        with open("debug_last_payload"+str(self.debug_toggler1%3)+".json", "w") as file:
+            self.debug_toggler1 += 1
+            json.dump(payload, file, indent=4)
+
         async with aiohttp.ClientSession(timeout=ClientTimeout(total=600)) as session:
             async with session.post(self.api_url, json=payload, headers=self.headers) as response:
                 if response.status == 200:
@@ -1118,17 +1141,12 @@ I have self-worth issues and avoid people.
                             buffer += chunk.decode('utf-8')
                             while "\n" in buffer:
                                 line, buffer = buffer.split("\n", 1)
-                                if line.strip():
-                                    try:
-                                        data = json.loads(line)
-                                        message_content = data.get("message", {}).get("content", "")
-                                        if message_content:
-                                            assistant_reply += message_content
-                                        if data.get("done", False):
-                                            break
-                                    except json.JSONDecodeError as e:
-                                        print(f"Failed to decode JSON: {e}")
-                                        print(f"Line: {line}")
+                                assistant_reply, should_break = self.process_line(line, assistant_reply)
+                                if should_break:
+                                    break
+
+                    if buffer.strip(): 
+                        assistant_reply, _ = self.process_line(buffer, assistant_reply)
 
                     return assistant_reply.strip()
                 else:

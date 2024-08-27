@@ -171,7 +171,7 @@ if __name__ == '__main__':
         @bot.event
         async def on_disconnect():
             print("Bot disconnected. Attempting to reconnect...")
-            while True:
+            while False: # it reconnects automatically allgedly
                 try:
                     asyncio.run(bot.connect())
                     break

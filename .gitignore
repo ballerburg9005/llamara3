@@ -2,5 +2,6 @@ message_history.db
 userinfo.txt
 temp_audios/*
 config.json
+debug_last_payload*
 promo*
 __pycache__
