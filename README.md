@@ -31,7 +31,7 @@ For Discord demo: https://discord.gg/DaDJGwyXMh .
 
 Some features in the diagram are still in the process of being implemented, but close to finished:
 
-1. Punishments and behavior enforcer are working, but slightly bugged and not fine-tuned
+1. Punishments and behavior enforcer are working, but bugged here and there and not fine-tuned (see todo.txt)
 2. Gcal fetching is done, but the tasks are not processed by additional logic
 3. Twitter, Bitcoin and denouncer punisher unimplemented
 
