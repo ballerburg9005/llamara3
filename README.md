@@ -35,7 +35,9 @@ Some features in the diagram are still in the process of being implemented, but 
 2. Gcal fetching is done, but the tasks are not processed by additional logic
 3. Twitter, Bitcoin and denouncer punisher unimplemented
 
-Please do not consider this a finished product yet. You can use it, but there is still quite some work to be done.
+Please do not consider this a finished product yet. You can use it, but there is still quite some work to be done. 
+
+I am mainly busy with pushing out features at this point. Queries are not optimized and such, and testing/tuning is only rudimentary. Have a look at "todo.txt" to get an idea.
 
 Requirements
 ============
