@@ -11,6 +11,9 @@
 - sometimes writes # slap_user_in_face
 - always picks #slap_user_in_face not other punishments
 
+- #enforce_ hashtags untested and sometimes happen randomly & get stuck
+- make #hypnosis mode get less stuck, just to produce huge texts
+
 - output sometimes concatenates if two voice generations are running at once
 
 - hashtags don't work in phone calls
