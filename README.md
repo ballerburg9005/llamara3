@@ -114,6 +114,14 @@ Anyone can talk to your Llamara3 who knows the XMPP handle, and conversely Llama
 
 ![216_2023_4740_Figa_HTML](https://github.com/user-attachments/assets/86190512-202a-4053-934b-90f6af902f79)
 
+
+Debugging
+=========
+You can re-run one of the last payloads with this command, to see how reproducible the output is.
+
+```
+LAST=1; wget --method=POST --header="Content-Type: application/json" --body-file=debug_last_payload${LAST}.json http://localhost:11434/api/chat -O- 2>&/dev/null | jq '.message.content'
+```
 License
 =======
 
