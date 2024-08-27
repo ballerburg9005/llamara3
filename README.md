@@ -44,6 +44,8 @@ Requirements
 
 It works quite fast and well with Llama3 16GB version on a 3090. If you use a smaller model, I think the first thing that will crap out is the behavior evaluation and the diary summary (current quality of this is only about 80%, and there are some double and tripe check mechanisms to account for poor output). I think there is still a lot of room for improvement though, if the queries are somewhat rewritten. You can help by testing better queries.
 
+When I used llama3.1 vanilla, it would produce extreme gibberish. Make sure to start with recommended model.
+
 Setup
 =====
 
