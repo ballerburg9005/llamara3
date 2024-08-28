@@ -1045,10 +1045,10 @@ I have self-worth issues and avoid people.
         if len(self.mood_swing) > 3:
             options = {
                 "num_predict": 32000,
-                "temperature": 100000,
-                "top_k" : 1000000,     # no idea if this even works creativity? where 40 is normal?
-                "top_p" : 0.999999,  # literally no idea creativity? where 
-                "num_ctx" : 4096, 
+                "temperature": 0.9,
+                "top_k" : 50,     # no idea if this even works creativity? where 40 is normal?
+                "top_p" : 0.9,  # literally no idea creativity? where 
+                "num_ctx" : 16384, 
                     }
         else:
              options = {
