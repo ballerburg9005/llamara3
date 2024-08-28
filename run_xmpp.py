@@ -70,6 +70,7 @@ class EchoBot(ClientXMPP, BotLogic):
 
         self.plugin['xep_0184'].auto_ack = True
 
+        self.messenger = "XMPP"
 
     def get_image_mime_type(self, image_data):
         mime = magic.Magic()
@@ -236,7 +237,7 @@ class EchoBot(ClientXMPP, BotLogic):
     # TODO this does not work sometimes for some reason
     async def handle_disconnect(self, data=""):
         print("Attempting to reconnect...")
-        while False:
+        while True:
             try:
                 await self.connect()
 #                await self.process(forever=False)

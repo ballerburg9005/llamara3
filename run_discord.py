@@ -7,6 +7,8 @@ import pathlib
 import random
 import string
 import json
+import threading
+import time as time_module
 
 from discord.ext import commands
 
@@ -28,6 +30,25 @@ class EchoBot(commands.Cog, BotLogic):
         self.magic = magic.Magic()
         self.ctx = None
 
+        self.messenger = "Discord"
+
+        self.keep_sending_heartbeats = True
+
+
+    async def cog_unload(self):
+        # Stop the heartbeat thread when the cog is unloaded
+        self.keep_sending_heartbeats = False
+
+    async def send_heartbeats(self):
+        while self.keep_sending_heartbeats:
+            await asyncio.sleep(5)
+            if self.bot.is_closed():
+                continue
+            await self.bot.ws.send_heartbeat({
+            'op': self.bot.ws.HEARTBEAT,
+            'd': int(time_module.time() * 1000),
+        })
+            
 
     def get_image_mime_type(self, image_data):
         mime_type = self.magic.from_buffer(image_data)
@@ -36,6 +57,11 @@ class EchoBot(commands.Cog, BotLogic):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.start_periodic_check())
+        
+        #self.bot.loop.create_task(self.send_heartbeats())
+
         print(f'Logged in as {self.bot.user.name}')
         for guild in self.bot.guilds:
             # Find the first available text channel in each guild
@@ -147,7 +173,7 @@ class EchoBot(commands.Cog, BotLogic):
 
 
     def is_connected(self) -> bool:
-        return self.is_ready()
+        return not self.bot.is_closed()
 
 
 if __name__ == '__main__':

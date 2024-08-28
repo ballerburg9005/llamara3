@@ -60,7 +60,9 @@ class BotLogic():
 
         self.settable_userfields = {"info", "project", "schedule", "important", "worktime", "mealtime", "relaxtime", "commute", "meal", "timezone", "google_calendar_email", "google_service_account_json_key", "name"}
 
+        self.messenger = None
 
+        self.mutex_user_voice_gen = []
         # if the description is empty, the AI don't has to write #punishment_successful to exit the mode
 
         # new punishment ideas:
@@ -798,6 +800,8 @@ I have self-worth issues and avoid people.
         self.conn.commit()
         return table_name
 
+
+    # override_last seemed to not work at some point?! TODO
     def save_message(self, handle, role, message, override_last=False):
 
         if self.mood_swing_modded_user_query > 0 and role == 'user':
@@ -809,11 +813,12 @@ I have self-worth issues and avoid people.
         
 
         if override_last:
+            print("Debug: overriding last message")
             self.cursor.execute(f"""
                 DELETE FROM {table_name}
                 WHERE timestamp = (
-                    SELECT MAX(timestamp) FROM {table_name} WHERE role = '"""+role+""""'
-                    ) AND role = '"""+role+""""'
+                    SELECT MAX(timestamp) FROM {table_name} WHERE role = '{role}'
+                    ) AND role = '{role}'
                 """)
             self.conn.commit()
 
@@ -826,68 +831,23 @@ I have self-worth issues and avoid people.
         
         return timestamp
 
-    def run_ffmpeg_command(self, command):
-        """ Run an ffmpeg command using subprocess. """
-        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if result.returncode != 0:
-            print(f"Error: {result.stderr.decode()}")
-        return result
-
-
-    def chain_mp3_files(self, input_files, output_file, user_handle):
-        """ Concatenate multiple MP3 files into one. """
-        concat_file_path = 'concat_list_'+user_handle+'.txt'
-        with open(concat_file_path, 'w') as f:
-            for file in input_files:
-                f.write(f"file '{file}'\n")     
-        command = f"ffmpeg -y -f concat -safe 0 -i {concat_file_path} -c copy {output_file}"
-        self.run_ffmpeg_command(command)
-        os.remove(concat_file_path)
-
-
-    def trim_background_music(self, input_file, duration, output_file):
-        """ Trim the background music to match the duration. """
-        command = f"ffmpeg -y -i {input_file} -t {duration} -c copy {output_file} "
-        self.run_ffmpeg_command(command)
-
-
-    def mix_audio_files(self, input_file1, input_file2, output_file, user_handle):
-        """ Mix two audio files together. """
-        command = (
-            f"ffmpeg -y -i {input_file1} -i {input_file2} "
-            "-filter_complex \"[0:a]volume=1[a];[1:a]volume=1[b];[a][b]amerge=inputs=2[a]\" "
-            "-map \"[a]\" temp_audios/"+user_handle+".mp3"
-        )
-        self.run_ffmpeg_command(command)
-
-
-    def get_audio_duration(self, file):
-        """ Get the duration of an audio file. """
-        command = f"ffprobe -i {file} -show_entries format=duration -v quiet -of csv=p=0"
-        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
-        return float(result.stdout.decode().strip())
-
 
     def process_audio_files(self, user_handle):
         user_handle = self.sanitize_ascii_input(user_handle, True)
         """ Example method to chain and mix audio files. """
         mp3_files = ['assets/intro.mp3', 'temp_audios/output_audio_'+user_handle+'.mp3', 'assets/outro.mp3']
-        concatenated_file = 'temp_audios/concatenated_'+user_handle+'.mp3'
         background_music_file = 'assets/bg_music.mp3'
-        trimmed_bg_music_file = 'temp_audios/trimmed_bg_music_'+user_handle+'.mp3'
         final_output_file = 'temp_audios/'+user_handle+'.mp3'
 
-        # Chain MP3 files
-        self.chain_mp3_files(mp3_files, concatenated_file, user_handle)
+        command = (
+            f'ffmpeg -i {mp3_files[0]} -i {mp3_files[1]} -i {mp3_files[2]} -i {background_music_file} -filter_complex "[0:a][1:a][2:a]concat=n=3:v=0:a=1[audio];[audio][3:a]amix=inputs=2:duration=first" -y {final_output_file}'
+        )
 
-        # Get duration of the concatenated file
-        duration = self.get_audio_duration(concatenated_file)
-
-        # Trim the background music
-        self.trim_background_music(background_music_file, duration, trimmed_bg_music_file)
-
-        # Mix the concatenated file with the trimmed background music
-        self.mix_audio_files(concatenated_file, trimmed_bg_music_file, final_output_file, user_handle)
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode != 0:
+            print(f"Error FFMPEG: {result.stderr.decode()}")
+        
+        self.mutex_user_voice_gen = [x for x in self.mutex_user_voice_gen if x != user_handle]
 
         print("Processing complete. Output file:", final_output_file)
 
@@ -1169,6 +1129,13 @@ I have self-worth issues and avoid people.
             async with session.post(self.tts_api_url, json=payload, headers=self.tts_headers) as response:
                 if response.status == 200:
                     audio_path = "temp_audios/output_audio_"+user_handle+".mp3"
+                    wait_debug_msg = 0
+                    while user_handle in self.mutex_user_voice_gen:
+                        if wait_debug_msg%20 == 0:
+                            print("awaiting previous voice gen ...")
+                        await asyncio.sleep(0.2) 
+                        wait_debug_msg += 1
+                    self.mutex_user_voice_gen.append(user_handle)
                     with open(audio_path, "wb") as audio_file:
                         audio_file.write(await response.read())
                     return audio_path
@@ -1265,28 +1232,157 @@ I have self-worth issues and avoid people.
                     await self.send_voice_message(None, user_handle, response)
 
 
+    async def behavior_analyzer(self, user_handle, user_info):
+        append_instructions = []
+        last_punishment = datetime.strptime(user_info["last_punishment"] if "last_punishment" in user_info and user_info["last_punishment"] else "1999-01-01 00:00:00", "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        behavior_score = await self.get_behavior_score(user_handle, last_punishment)
+        if behavior_score <= 3:
+            print("Bad behavior detected!")
+            punishstring = ', '.join(f"#{key} ({lst['severity']})" for key, lst in self.punishments.items() if "very severe" not in lst['severity']) 
+            append_instructions.append(" the application system has detected that the user might be engaging in bad behavior that needs to be punished. If you think that this is true to the current message, you can write a message consisting exlusively of a hashtag # followed by the punishment name. The following punishments are available: "+punishstring+" ")
+            return (append_instructions, True)
+        else:
+            return (append_instructions, False)
 
 
+    def hashtag_processor_from_database(self, user_handle):
+        append_instructions = []
+        ignore = False
 
-    async def process_message(self, user_handle, user_message):
-        if user_message.startswith("#"):
-            if user_message.startswith("#set") and (match := re.match(r"#set(\w+)", user_message)) and match.group(1) in self.settable_userfields:
-                user_field = re.match(r"#set(\w+)", user_message).group(1)
-                if len(user_message.split()) == 1:
-                    current_info = self.get_user_field(user_handle, user_field)
-                    await self.send_text_message(None, user_handle, f"{current_info}")
+        active_modes = self.get_modes_for_handle(user_handle)
+        
+        debug_modes_active = []
+        if any(mode in self.hashtags for mode in active_modes):
+            for mode in (mode for mode in active_modes if mode in self.hashtags):
+                append_instructions.append(self.hashtags[mode]["txt"])
+                debug_modes_active.append(mode)
+            print("Modes currently active: "+str(", ".join(debug_modes_active)))
+        elif len(active_modes) > 0 and not any(mode in self.punishments for mode in active_modes):
+            print("Unimplemented mode within: "+str(active_modes))
+
+        # this is messy, we only want one punishment at a time TODO
+        if any(mode in self.punishments for mode in active_modes):
+            for mode in (mode for mode in active_modes if mode in self.punishments):
+                print("Punishment is in progress: "+str(self.punishments[mode]["txt"]))
+                punishstring = ', '.join(f"#{key} ({lst['severity']})" for key, lst in self.punishments.items() if "mild" not in lst['severity']) 
+                append_instructions.append('a punishment is in progress: "'+self.punishments[mode]["txt"]+'". You have to assess whether or not the user has executed the punishment and then write #punishment_successful if this is true (it does not suffice for the user to express willingness to do it, he has to confirm that he did it). If he has not executed the punishment, then instead ignore his message and coerce him into executing the punishment. Escalate verbally abusing him if he resists. If he repeatedly refuses, choose a more severe punishment hashtag: '+punishstring+'. Do not talk about or reason about those instructions to the user. Don\'t forget to write #punishment_successful if the user said that he did the punishment.')
+                if any(len(re.findall(r'ignore', mode)) > 0 for mode in active_modes): 
+                    # TODO maybe buffer messages into roster buffer TODO
+                    ignore = True
+            return (append_instructions, False, ignore)
+        # otherwise, run behavior analyzer
+        else: 
+            return (append_instructions, True, ignore)
+            
+
+    # TODO: save_message probably done multiple times with multiple tags, not sure if it makes sense
+    async def hashtag_processor_from_model_output(self, user_handle, response):
+
+        save_message = True
+        active_modes = self.get_modes_for_handle(user_handle)
+
+        for tag in list(set(re.findall(r'#\s*(\w+)', response))):
+            tag = re.sub(r'\s*', '', tag)
+            print("Processing hashtag: "+str(tag))
+            if tag in ["lecture", "treat_like_baby", "verbal_abuse"]:
+                save_message = False
+                self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
+                response += "\n\n" + await self.chat_with_model(user_handle, user_message=self.hashtags[tag]["txt"])
+                if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
+                    self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
+                self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
+            elif tag in ["enforce_arguing", "enforce_erotic_hypnosis", "enforce_apology", "enforce_affirmation"]:
+                if tag in ["enforce_arguing"]:
+                    append_instruction = "You are now having an agument. Prompt the user to conform to your demands."
+                elif tag in ["enforce_erotic_hypnosis"]:
+                    append_instruction = self.hashtags[tag]["txt"]+". Start your erotic hypnosis now!"
+                elif tag in ["enforce_apology"]:
+                    append_instruction = "Demand that the user apologizes to you."
+                elif tag in ["enforce_affirmation"]:
+                    append_instruction = "Demand that the user sexually affirms you through submission and endorsement."
+                save_message = False
+                self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
+                response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
+                if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
+                    self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
+                self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
+            elif tag in ["punishment_successful"]:
+                for mode in (mode for mode in active_modes if mode in self.punishments):
+                    self.reset_modes_for_handle(user_handle, mode)
+                response = await self.chat_with_model(user_handle)
+            elif tag in ["arguing_successful"]:
+                self.reset_modes_for_handle(user_handle, "enforce_arguing")
+                response = await self.chat_with_model(user_handle)
+            elif tag in ["hypnosis_finished"]:
+                self.reset_modes_for_handle(user_handle, "enforce_erotic_hypnosis")
+                response = await self.chat_with_model(user_handle)
+            elif tag in ["apology_successful"]:
+                self.reset_modes_for_handle(user_handle, "enforce_apology")
+                response = await self.chat_with_model(user_handle)
+            elif tag in ["affirmation_successful"]:
+                self.reset_modes_for_handle(user_handle, "enforce_affirmation")
+                response = await self.chat_with_model(user_handle)
+            elif tag in self.punishments:
+                save_message = False
+                self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
+                append_instruction = "Instruct the user to perform the following punishment: "+self.punishments[tag]["txt"]+". Do not respond with hashtags!"
+                response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
+                if "timeout" in self.punishments[tag] and self.punishments[tag]["timeout"] > 0:
+                    timeout = self.punishments[tag]["timeout"]
                 else:
-                    # Update info
-                    successmsg  = self.update_user_field(user_handle, user_field, ' '.join(user_message.split(maxsplit=1)[1:]) )
-                    await self.send_text_message(None, user_handle, successmsg)
+                    timeout = 6*60
+                self.save_mode_for_handle(user_handle, tag, timeout)
+                self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
+            elif tag in ["egregious_disrespect", "exceptional_disrespect", "disrespect"]:
+                if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
+                    timeout = self.hashtags[tag]["timeout"]
+                else:
+                    timeout = 5*60
+                self.save_mode_for_handle(user_handle, tag, timeout)
+            elif len(tag) > 0:
+                print("Model used unknown hastag: "+str(tag))
+#                        if "enforce_" in tag:
+#                        if "enforce_" in tag:
+#                        if "enforce_" in tag:
+                
+#                        elif tag in self.punishments and self.punishments[tag] and len(self.punishments[tag][0]) > 3:
+
+        if len(re.findall(r'#\s*\w+', response)) > 0:
+            print("Model used the following hashtags in message: "+(", ".join(re.findall(r'#\s*\w+', response))))
+
+        used_asterisks = re.findall(r'\*.*\*', response) 
+        if len(used_asterisks) > 0:
+                print("Model used asterisk expressions (garbage): "+str(used_asterisks))
+                response = re.sub(r'\*.*\*', '', response)
+        response = re.sub(r'#\s*\w+', '', response)
+
+        return (response, save_message)
+
+    async def process_commands(user_handle, user_message):
+        if user_message.startswith("#set") and (match := re.match(r"#set(\w+)", user_message)) and match.group(1) in self.settable_userfields:
+            user_field = re.match(r"#set(\w+)", user_message).group(1)
+            if len(user_message.split()) == 1:
+                current_info = self.get_user_field(user_handle, user_field)
+                await self.send_text_message(None, user_handle, f"{current_info}")
             else:
-                await self.send_text_message(None, user_handle, self.description+""" 
+                # Update info
+                successmsg  = self.update_user_field(user_handle, user_field, ' '.join(user_message.split(maxsplit=1)[1:]) )
+                await self.send_text_message(None, user_handle, successmsg)
+        else:
+            await self.send_text_message(None, user_handle, self.description+""" 
 
 Commands:
 
 """+(', '.join(f"#set{field}" for field in self.settable_userfields))+"""
 
 Write RESET! for the model to ignore all chat history prior.""")
+
+
+    async def process_message(self, user_handle, user_message):
+
+        # hashtag commands, text output only
+        if user_message.startswith("#"):
+            await self.process_commands(user_handle, user_message)
         # Send intro message.
         elif not self.get_user_handles(user_handle):
             user_info = self.get_user_info(user_handle)
@@ -1296,126 +1392,36 @@ Write RESET! for the model to ignore all chat history prior.""")
 
             self.save_message(user_handle, 'user',  user_message)
 
+            bad_behavior = False
+            ignore = False
+
             save_message = True
+            behavior_analyze = True
             append_instructions = []
+
             if user_message == "RESET!":
                 self.reset_modes_for_handle(user_handle)
             else:
-                active_modes = self.get_modes_for_handle(user_handle)
-                
-                debug_modes_active = []
-                if any(mode in self.hashtags for mode in active_modes):
-                    for mode in (mode for mode in active_modes if mode in self.hashtags):
-                        append_instructions.append(self.hashtags[mode]["txt"])
-                        debug_modes_active.append(mode)
-                    print("Modes currently active: "+str(", ".join(debug_modes_active)))
-                elif not any(mode in self.punishments for mode in active_modes):
-                    print("Unimplemented mode within: "+str(active_modes))
+                append_instructions_proc, behavior_analyze, ignore = self.hashtag_processor_from_database(user_handle)
+                append_instructions += append_instructions_proc
+                   
+                if behavior_analyze and not ignore:
+                    append_instructions_behavior, bad_behavior = await self.behavior_analyzer(user_handle, user_info)
+                    append_instructions += append_instructions_behavior
 
-                # this is messy, we only want one punishment at a time TODO
-                if any(mode in self.punishments for mode in active_modes):
-                    for mode in (mode for mode in active_modes if mode in self.punishments):
-                        print("Punishment is in progress: "+str(self.punishments[mode]["txt"]))
-                        punishstring = ', '.join(f"#{key} ({lst['severity']})" for key, lst in self.punishments.items() if "mild" not in lst['severity']) 
-                        append_instructions.append('a punishment is in progress: "'+self.punishments[mode]["txt"]+'". You have to assess whether or not the user has executed the punishment and then write #punishment_successful if this is true (it does not suffice for the user to express willingness to do it, he has to confirm that he did it). If he has not executed the punishment, then instead ignore his message and coerce him into executing the punishment. Escalate verbally abusing him if he resists. If he repeatedly refuses, choose a more severe punishment hashtag: '+punishstring+'. Do not talk about or reason about those instructions to the user. Don\'t forget to write #punishment_successful if the user said that he did the punishment.')
-                        if any(len(re.findall(r'ignore', mode)) > 0 for mode in active_modes): 
-                            # TODO maybe buffer messages into roster buffer TODO
-                            msg.reply(f"*Llamara is ignoring you*").send() 
-                # otherwise, run behavior analyzer
-                else: 
-                    last_punishment = datetime.strptime(user_info["last_punishment"] if "last_punishment" in user_info and user_info["last_punishment"] else "1999-01-01 00:00:00", "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-                    behavior_score = await self.get_behavior_score(user_handle, last_punishment)
-                    if behavior_score <= 3:
-                        print("Bad behavior detected!")
-                        punishstring = ', '.join(f"#{key} ({lst['severity']})" for key, lst in self.punishments.items() if "very severe" not in lst['severity']) 
-                        append_instructions.append(" the application system has detected that the user might be engaging in bad behavior that needs to be punished. If you think that this is true to the current message, you can write a message consisting exlusively of a hashtag # followed by the punishment name. The following punishments are available: "+punishstring+" ")
-            
-            response = await self.chat_with_model(user_handle, append_instruction="* *".join(append_instructions))
-#                    response = self.handle_response_hashtags(response)
-
-            # this only processes tags that the model appends on it's own
-            for tag in list(set(re.findall(r'#\s*(\w+)', response))):
-                tag = re.sub(r'\s*', '', tag)
-                print("Processing hashtag: "+str(tag))
-                if tag in ["lecture", "treat_like_baby", "verbal_abuse"]:
-                    save_message = False
-                    self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
-                    response += "\n\n" + await self.chat_with_model(user_handle, user_message=self.hashtags[tag]["txt"])
-                    if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
-                        self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
-                    self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
-                elif tag in ["enforce_arguing", "enforce_erotic_hypnosis", "enforce_apology", "enforce_affirmation"]:
-                    if tag in ["enforce_arguing"]:
-                        append_instruction = "You are now having an agument. Prompt the user to conform to your demands."
-                    elif tag in ["enforce_erotic_hypnosis"]:
-                        append_instruction = self.hashtags[tag]["txt"]+". Start your erotic hypnosis now!"
-                    elif tag in ["enforce_apology"]:
-                        append_instruction = "Demand that the user apologizes to you."
-                    elif tag in ["enforce_affirmation"]:
-                        append_instruction = "Demand that the user sexually affirms you through submission and endorsement."
-                    save_message = False
-                    self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
-                    response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
-                    if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
-                        self.save_mode_for_handle(user_handle, tag, self.hashtags[tag]["timeout"])
-                    self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
-                elif tag in ["punishment_successful"]:
-                    for mode in (mode for mode in active_modes if mode in self.punishments):
-                        self.reset_modes_for_handle(user_handle, mode)
-                    response = await self.chat_with_model(user_handle)
-                elif tag in ["arguing_successful"]:
-                    self.reset_modes_for_handle(user_handle, "enforce_arguing")
-                    response = await self.chat_with_model(user_handle)
-                elif tag in ["hypnosis_finished"]:
-                    self.reset_modes_for_handle(user_handle, "enforce_erotic_hypnosis")
-                    response = await self.chat_with_model(user_handle)
-                elif tag in ["apology_successful"]:
-                    self.reset_modes_for_handle(user_handle, "enforce_apology")
-                    response = await self.chat_with_model(user_handle)
-                elif tag in ["affirmation_successful"]:
-                    self.reset_modes_for_handle(user_handle, "enforce_affirmation")
-                    response = await self.chat_with_model(user_handle)
-                elif tag in self.punishments:
-                    save_message = False
-                    self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response))
-                    append_instruction = "Instruct the user to perform the following punishment: "+self.punishments[tag]["txt"]+". Do not respond with hashtags!"
-                    response += "\n\n" + await self.chat_with_model(user_handle, user_message=append_instruction)
-                    if "timeout" in self.punishments[tag] and self.punishments[tag]["timeout"] > 0:
-                        timeout = self.punishments[tag]["timeout"]
-                    else:
-                        timeout = 6*60
-                    self.save_mode_for_handle(user_handle, tag, timeout)
-                    self.save_message(user_handle, 'assistant', re.sub(r'#\s*\w+', '', response), override_last=True)
-                elif len(re.findall(r'^disrespect.*', tag)):
-                    if "timeout" in self.hashtags[tag] and self.hashtags[tag]["timeout"] > 0:
-                        timeout = self.hashtags[tag]["timeout"]
-                    else:
-                        timeout = 5*60
-                    self.save_mode_for_handle(user_handle, tag, timeout)
-                elif len(tag) > 0:
-                    print("Model used unknown hastag: "+str(tag))
-#                        if "enforce_" in tag:
-#                        if "enforce_" in tag:
-#                        if "enforce_" in tag:
-                    
-#                        elif tag in self.punishments and self.punishments[tag] and len(self.punishments[tag][0]) > 3:
-
-            if len(re.findall(r'#\s*\w+', response)) > 0:
-                print("Model used the following hashtags in message: "+(", ".join(re.findall(r'#\s*\w+', response))))
-
-            used_asterisks = re.findall(r'\*.*\*', response) 
-            if len(used_asterisks) > 0:
-                    print("Model used asterisk expressions (garbage): "+str(used_asterisks))
-                    response = re.sub(r'\*.*\*', '', response)
-            response = re.sub(r'#\s*\w+', '', response)
-
-            if save_message:
-                self.save_message(user_handle, 'assistant', response)
-
-            if len(response.strip()) < 3:
-                await self.send_text_message(None, user_handle, f"...")
+            if ignore:
+                await self.send_text_message(None, user_handle, "*Llamara is ignoring you*")
             else:
-                await self.send_voice_message(None, user_handle, response)
+                response = await self.chat_with_model(user_handle, append_instruction="* *".join(append_instructions))
+                response, save_message = await self.hashtag_processor_from_model_output(user_handle, response)
+
+                if save_message:
+                    self.save_message(user_handle, 'assistant', response)
+
+                if len(response.strip()) < 3:
+                    await self.send_text_message(None, user_handle, f"...")
+                else:
+                    await self.send_voice_message(None, user_handle, response)
 
 
     def caesar_translate(self, text, shift):
@@ -1429,7 +1435,10 @@ Write RESET! for the model to ignore all chat history prior.""")
         user_handles = []
         try:
             if len(user_handle) < 4:
-                self.cursor.execute("SELECT user_handle FROM user_info")
+                if self.messenger == "Discord":
+                    self.cursor.execute("SELECT user_handle FROM user_info WHERE user_handle LIKE '%#%'")
+                else:
+                    self.cursor.execute("SELECT user_handle FROM user_info WHERE user_handle LIKE '%@%'")
             else:
                 self.cursor.execute("SELECT user_handle FROM user_info WHERE user_handle = ? ", (user_handle,))
             user_infos = self.cursor.fetchall()
@@ -1441,7 +1450,9 @@ Write RESET! for the model to ignore all chat history prior.""")
     # TODO
     async def process_gcal(self, user_handle):
         events = await self.get_gcal_events(user_handle)
-        print(events)
+        #if events:
+
+
 
         return True
  
