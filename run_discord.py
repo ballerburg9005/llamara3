@@ -164,7 +164,7 @@ class EchoBot(commands.Cog, BotLogic):
                 avatar_type = self.get_image_mime_type(avatar)
                 try:
                     await self.bot.user.edit(avatar=avatar)
-                    await ctx.send("Avatar updated successfully.")
+                    #await ctx.send("Avatar updated successfully.")
                 except discord.HTTPException as e:
                     self.logger.error(f"Could not set avatar: {e}")
                     await ctx.send("Error when setting avatar.")

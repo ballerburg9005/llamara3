@@ -922,7 +922,7 @@ I have self-worth issues and avoid people.
             "messages": messages_real,
             "options": {
                 "num_predict": 2048,
-                "temperature": 0.2,
+                "temperature": 0.1,
             },
             "stream": False
         }
@@ -1001,7 +1001,7 @@ I have self-worth issues and avoid people.
                 "messages": messages_real,
                 "options": {
                     "num_predict": 16000,
-                    "temperature": 1,
+                    "temperature": 0.2,
                 },
                 "stream": False
             }
@@ -1033,27 +1033,32 @@ I have self-worth issues and avoid people.
 
         messages.insert(0, prepend_message)
 
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "options": {
-                "num_predict": 32000,
-                "num_ctx" : 16384,
-            },
-            "stream": False
-        }
+#        payload = {
+#            "model": self.model,
+#            "messages": messages,
+#            "options": {
+#                "num_predict": 32000,
+#                "num_ctx" : 16384,
+#                "temperature": 0.2,
+#            },
+#            "stream": False
+#        }
+
+
+        
         if len(self.mood_swing) > 3:
             options = {
                 "num_predict": 32000,
                 "temperature": 0.9,
                 "top_k" : 50,     # no idea if this even works creativity? where 40 is normal?
                 "top_p" : 0.9,  # literally no idea creativity? where 
-                "num_ctx" : 16384, 
+                "num_ctx" : 4096, 
                     }
         else:
              options = {
                 "num_predict": 32000,
                 "num_ctx" : 4096,
+                "temperature": 0.2,
                     }
            
         payload = {
@@ -1358,7 +1363,7 @@ I have self-worth issues and avoid people.
 
         return (response, save_message)
 
-    async def process_commands(user_handle, user_message):
+    async def process_commands(self, user_handle, user_message):
         if user_message.startswith("#set") and (match := re.match(r"#set(\w+)", user_message)) and match.group(1) in self.settable_userfields:
             user_field = re.match(r"#set(\w+)", user_message).group(1)
             if len(user_message.split()) == 1:
