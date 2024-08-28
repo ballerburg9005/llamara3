@@ -1,1 +1,1 @@
-{"model": "Llama-3-8B-Instruct-abliterated-v2:latest", "user": "john@xabber.com", "password": "123456789"}
+{"model": "hermes3:8b-llama3.1-fp16", "user": "john@xabber.com", "password": "123456789"}

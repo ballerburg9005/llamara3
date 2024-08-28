@@ -70,10 +70,13 @@ bash startup.sh
 **If using model from Ollama repo:**
 ```
 # install ollama with your package manager
-echo "test" | ollama run dolphin-llama3:8b-v2.9-fp16
+echo "test" | ollama run hermes3:8b-llama3.1-fp16
 ```
 
 **If using gguf model from Huggingface (recommended):**
+
+I am currently testing hermes3:8b-llama3.1-fp16 , before I used this model:
+
 ```
 # install ollama with your package manager
 git lfs install
