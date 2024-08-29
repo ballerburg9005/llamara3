@@ -1052,13 +1052,13 @@ I have self-worth issues and avoid people.
                 "temperature": 0.9,
                 "top_k" : 50,     # no idea if this even works creativity? where 40 is normal?
                 "top_p" : 0.9,  # literally no idea creativity? where 
-                "num_ctx" : 4096, 
+                "num_ctx" : 2048, 
                     }
         else:
              options = {
                 "num_predict": 32000,
-                "num_ctx" : 4096,
-                "temperature": 0.2,
+                "num_ctx" : 8192,
+                "temperature": 1.0,
                     }
            
         payload = {
@@ -1136,7 +1136,7 @@ I have self-worth issues and avoid people.
                     audio_path = "temp_audios/output_audio_"+user_handle+".mp3"
                     wait_debug_msg = 0
                     while user_handle in self.mutex_user_voice_gen:
-                        if wait_debug_msg%20 == 0:
+                        if wait_debug_msg%80 == 0:
                             print("awaiting previous voice gen ...")
                         await asyncio.sleep(0.2) 
                         wait_debug_msg += 1
@@ -1355,10 +1355,10 @@ I have self-worth issues and avoid people.
         if len(re.findall(r'#\s*\w+', response)) > 0:
             print("Model used the following hashtags in message: "+(", ".join(re.findall(r'#\s*\w+', response))))
 
-        used_asterisks = re.findall(r'\*.*\*', response) 
+        used_asterisks = re.findall(r'\*[^*]*\*', response) 
         if len(used_asterisks) > 0:
-                print("Model used asterisk expressions (garbage): "+str(used_asterisks))
-                response = re.sub(r'\*.*\*', '', response)
+                print("Model used asterisk expressions (garbage but not filtered): "+str(used_asterisks))
+                #response = re.sub(r'\*[^*]*\*', '', response)
         response = re.sub(r'#\s*\w+', '', response)
 
         return (response, save_message)

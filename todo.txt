@@ -5,25 +5,24 @@
 
 - update diary spaced 1 minute apart by user amounts
 
-- put on github
-- tag detection -> confirm mode
+- try out vectorstore memory?!
 
-- sometimes writes # slap_user_in_face
-- always picks #slap_user_in_face not other punishments
+- test out new 3.1 tags <|my_custom_very_descriptive_action|> instead of hashtags, see "brave search"
+
+
+- always picks #slap_user_in_face not other punishments 95% of time
 
 - #enforce_ hashtags untested and sometimes happen randomly & get stuck
 - make #hypnosis mode get less stuck, just to produce huge texts
 
-- output sometimes concatenates if two voice generations are running at once
+- create mutex lock for reply and buffer all replies to be processed at once after unlock
 
 - hashtags don't work in phone calls
 
-? says "voice calling" endlessly
-
-? #lecture tag, produces essay-length responses instead "If you feel that it would be appropriate to lecture the user even more append you message with #lecture ."
+? says "voice calling" endlessly (sort of fixed with trick)
 
 
-New ideas Reddit:
+New ideas from Reddit:
 - #delete_dwarf_milfs randomly deletes from your porn collection as punishment 
 
 
