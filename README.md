@@ -39,6 +39,9 @@ Please do not consider this a finished product yet. You can use it, but there is
 
 I am mainly busy with pushing out features at this point. Queries are not optimized and such, and testing/tuning is only rudimentary. Have a look at "todo.txt" to get an idea.
 
+Also I have switched to hermes3:8b-llama3.1-fp16 now and it is totally untested (seems to be overly verbose).
+
+
 Requirements
 ============
 
