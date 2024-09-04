@@ -25,9 +25,7 @@ Features
 Current State of Affairs and Demo
 =================================
 
-You can reach Llamara3 at this **XMPP handle: llamara3@pwned.life** (please message me if it stopped working).
-
-For Discord demo: https://discord.gg/DaDJGwyXMh .
+Discord demo: [https://discord.gg/DaDJGwyXMh](https://discord.gg/WFqq6NBrkr) .
 
 Some features in the diagram are still in the process of being implemented, but close to finished:
 
