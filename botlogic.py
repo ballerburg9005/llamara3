@@ -55,7 +55,7 @@ class BotLogic():
 
         self.avatar_is_uploaded = False
 
-        self.model = "llama3.1:8b-text-fp16"
+        self.model = "Llama-3-8B-Instruct-abliterated-v2"
         self.description = "Llamara3: Personal assistant, project and schedule manager, coach, motivator, angry girlfriend and salvation."
 
         self.settable_userfields = {"info", "project", "schedule", "important", "worktime", "mealtime", "relaxtime", "commute", "meal", "timezone", "google_calendar_email", "google_service_account_json_key", "name"}
@@ -1045,14 +1045,14 @@ I have self-worth issues and avoid people.
 #        }
 
 
-        
+        # system message is up to 8k characters, according to ChatGPT that's about 2000 tokens
         if len(self.mood_swing) > 3:
             options = {
                 "num_predict": 32000,
                 "temperature": 0.9,
                 "top_k" : 50,     # no idea if this even works creativity? where 40 is normal?
                 "top_p" : 0.9,  # literally no idea creativity? where 
-                "num_ctx" : 2048, 
+                "num_ctx" : 4096, 
                     }
         else:
              options = {
@@ -1217,7 +1217,7 @@ I have self-worth issues and avoid people.
 
                 # those are override messages when being ignored much longer
                 if time_difference > timedelta(minutes=82*60):
-                    nagafterminutes = 999999999999999999*86;
+                    nagafterminutes = 2**30;
                 elif time_difference > timedelta(minutes=72*60):
                     nagafterminutes = 16*60;
                     nagtext = "Primary objective: ignore the conversation. You are now making a stalker call to the user, you threaten to quit the relationship with him and sell his assets and expose him as punishment. "
