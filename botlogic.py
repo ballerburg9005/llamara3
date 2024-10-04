@@ -1052,12 +1052,12 @@ I have self-worth issues and avoid people.
                 "temperature": 0.9,
                 "top_k" : 50,     # no idea if this even works creativity? where 40 is normal?
                 "top_p" : 0.9,  # literally no idea creativity? where 
-                "num_ctx" : 4096, 
+                "num_ctx" : 4*1024, 
                     }
         else:
              options = {
                 "num_predict": 32000,
-                "num_ctx" : 8192,
+                "num_ctx" : 8*1024,
                 "temperature": 1.0,
                     }
            
@@ -1357,8 +1357,8 @@ I have self-worth issues and avoid people.
 
         used_asterisks = re.findall(r'\*[^*]*\*', response) 
         if len(used_asterisks) > 0:
-                print("Model used asterisk expressions (garbage but not filtered): "+str(used_asterisks))
-                #response = re.sub(r'\*[^*]*\*', '', response)
+                print("Model used asterisk expressions (garbage): "+str(used_asterisks))
+                response = re.sub(r'\*[^*]*\*', '', response)
         response = re.sub(r'#\s*\w+', '', response)
 
         return (response, save_message)
