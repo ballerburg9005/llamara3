@@ -1,3 +1,5 @@
+- use this 10x faster version of xtts works via python directly
+
 - google calendar
 - phones other AIs and ridicules user
 - phone calls are repetitive and not angry enough, should be more like "what are you doing?! are you fucking up again"
