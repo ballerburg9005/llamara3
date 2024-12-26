@@ -1,4 +1,4 @@
-- use this 10x faster version of xtts works via python directly
+- use Auralis, 10x faster version of xtts works via python directly
 
 - google calendar
 - phones other AIs and ridicules user
