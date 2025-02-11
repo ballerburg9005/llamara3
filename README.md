@@ -37,7 +37,7 @@ Please do not consider this a finished product yet. You can use it, but there is
 
 I am mainly busy with pushing out features at this point. Queries are not optimized and such, and testing/tuning is only rudimentary. Have a look at "todo.txt" to get an idea.
 
-Also I have switched to hermes3:8b-llama3.1-fp16 now and there are various issues with the model being 5x more verbose ... somewhen later I tried deepseek 20GB version and the results were impressive, though things were kind of getting very slow on 3090 comparably and you need to filter out the <think> tags, which I didn't. There is a much faster alternative for speech synthesis, as outlined in todo.txt, which isn't difficult to implement either. Didn't have the motivation yet to crunch some more at this project.
+Also I have switched to hermes3:8b-llama3.1-fp16 now and there are various issues with the model being 5x more verbose ... somewhen later I tried deepseek 20GB version and the results were impressive, though things were kind of getting very slow on 3090 comparably and you need to filter out the "think" tags, which I didn't. There is a much faster alternative for speech synthesis, as outlined in todo.txt, which isn't difficult to implement either. Didn't have the motivation yet to crunch some more at this project.
 
 
 Requirements
