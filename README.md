@@ -8,7 +8,7 @@ I don't feel like doing a total overhaul or partial rewrite any time soon.
 
 At the time my project was somewhat abitious and challenging. But right now is the time with [GLM-4.7-Flash](https://unsloth.ai/docs/models/glm-4.7-flash) to do it in a cleaner, successful and nice way.
 
-If this project interests you, just paste it into Grok Expert and tell it to design your own new improved one from scratch! 
+If this project interests you, just paste it into Grok Expert and tell it to design your own new improved one from scratch! Many of the design choices I made are still important to construct personality, behavior and such.
 
 Summary
 =======
