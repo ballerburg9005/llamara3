@@ -3,12 +3,12 @@ News 2026
 
 The project is 2 years old and there is a new game-changing model now: [GLM-4.7-Flash](https://unsloth.ai/docs/models/glm-4.7-flash).
 This model is on par with ChatGPT-3 and partially as good as GPT-3.5. The improvement to the Llama3 models is extreme, such that a substantial portion of this project's code has essentially become obsolete.
-Also with agentic capabilities and tool use, the possibilities are vastly different now and this project is somewhat removed from the state of the art.
+Also with agentic capabilities and tool use, the possibilities are vastly different now and this project is somewhat removed from the state of the art. Also Ollama is a problem with tool use. Switching to something like llama.cpp would be very important.
 I don't feel like doing a total overhaul or partial rewrite any time soon.
 
 At the time my project was somewhat abitious and challenging. But right now is the time with [GLM-4.7-Flash](https://unsloth.ai/docs/models/glm-4.7-flash) to do it in a cleaner, successful and nice way.
 
-If this project interests you, just paste it into Grok Expert and tell it to design your own new improved one from scratch!
+If this project interests you, just paste it into Grok Expert and tell it to design your own new improved one from scratch! 
 
 Summary
 =======
